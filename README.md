@@ -1,5 +1,4 @@
-##[Digital Nurture 3.0](https://github.com/trinity2040/Digital-Nurture-3.0)
-<br />
+##Digital Nurture 3.0
 Java FSE Solutions
 <br />
 <br />
