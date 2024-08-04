@@ -1,0 +1,138 @@
+-- Exercise 5: Triggers
+
+
+-- Scenario 1: Automatically update the last modified date when a customer's record is updated.
+-- Question: Write a trigger UpdateCustomerLastModified that updates the LastModified column of the Customers table to the current date whenever a customer's record is updated.
+
+
+CREATE TABLE customers (
+    customer_id NUMBER PRIMARY KEY,
+    name VARCHAR2(100),
+    balance NUMBER,
+    last_modified DATE
+);
+
+-- Insert sample data into the customers table
+INSERT INTO customers (customer_id, name, balance, last_modified) VALUES (1, 'John Doe', 5000, SYSDATE);
+INSERT INTO customers (customer_id, name, balance, last_modified) VALUES (2, 'Jane Smith', 3000, SYSDATE);
+INSERT INTO customers (customer_id, name, balance, last_modified) VALUES (3, 'Alice Johnson', 7000, SYSDATE);
+INSERT INTO customers (customer_id, name, balance, last_modified) VALUES (4, 'Bob Brown', 2000, SYSDATE);
+CREATE OR REPLACE TRIGGER UpdateCustomerLastModified
+BEFORE UPDATE ON customers
+FOR EACH ROW
+BEGIN
+    :NEW.last_modified := SYSDATE;
+END;
+/
+-- Update a record in the customers table
+UPDATE customers
+SET balance = 5500
+WHERE customer_id = 1;
+
+-- Check the updated record
+SELECT * FROM customers
+WHERE customer_id = 1;
+
+
+
+
+
+
+-- Scenario 2: Maintain an audit log for all transactions.
+-- Question: Write a trigger LogTransaction that inserts a record into an AuditLog table whenever a transaction is inserted into the Transactions table.
+
+
+CREATE TABLE Transactions (
+    transaction_id NUMBER PRIMARY KEY,
+    account_id NUMBER,
+    transaction_amount NUMBER,
+    transaction_date DATE
+);
+
+CREATE TABLE AuditLog (
+    audit_id NUMBER PRIMARY KEY,
+    transaction_id NUMBER,
+    account_id NUMBER,
+    transaction_amount NUMBER,
+    transaction_date DATE,
+    log_timestamp DATE
+);
+CREATE OR REPLACE TRIGGER LogTransaction
+AFTER INSERT ON Transactions
+FOR EACH ROW
+BEGIN
+    INSERT INTO AuditLog (audit_id, transaction_id, account_id, transaction_amount, transaction_date, log_timestamp)
+    VALUES (AuditLog_seq.NEXTVAL, :NEW.transaction_id, :NEW.account_id, :NEW.transaction_amount, :NEW.transaction_date, SYSDATE);
+END;
+/
+CREATE SEQUENCE AuditLog_seq
+START WITH 1
+INCREMENT BY 1;
+-- Insert a record into the Transactions table
+INSERT INTO Transactions (transaction_id, account_id, transaction_amount, transaction_date)
+VALUES (1, 101, 200, SYSDATE);
+
+-- Check the AuditLog table
+SELECT * FROM AuditLog;
+
+
+
+
+
+
+-- Scenario 3: Enforce business rules on deposits and withdrawals.
+-- Question: Write a trigger CheckTransactionRules that ensures withdrawals do not exceed the balance and deposits are positive before inserting a record into the Transactions table.
+
+CREATE TABLE Accounts (
+    account_id NUMBER PRIMARY KEY,
+    balance NUMBER
+);
+
+CREATE TABLE Transactions (
+    transaction_id NUMBER PRIMARY KEY,
+    account_id NUMBER,
+    transaction_amount NUMBER,
+    transaction_date DATE
+);
+CREATE OR REPLACE TRIGGER CheckTransactionRules
+BEFORE INSERT ON Transactions
+FOR EACH ROW
+DECLARE
+    current_balance NUMBER;
+BEGIN
+    -- Get the current balance of the account
+    SELECT balance INTO current_balance
+    FROM Accounts
+    WHERE account_id = :NEW.account_id;
+
+    -- Check if the transaction is a withdrawal
+    IF :NEW.transaction_amount < 0 THEN
+        -- Ensure withdrawal does not exceed the balance
+        IF current_balance + :NEW.transaction_amount < 0 THEN
+            RAISE_APPLICATION_ERROR(-20001, 'Insufficient balance for withdrawal.');
+        END IF;
+    ELSIF :NEW.transaction_amount = 0 THEN
+        -- Ensure deposits are positive
+        RAISE_APPLICATION_ERROR(-20002, 'Deposit amount must be positive.');
+    END IF;
+END;
+/
+-- Insert a record into the Accounts table
+INSERT INTO Accounts (account_id, balance)
+VALUES (101, 500);
+
+-- Test valid deposit
+INSERT INTO Transactions (transaction_id, account_id, transaction_amount, transaction_date)
+VALUES (1, 101, 200, SYSDATE);
+
+-- Test valid withdrawal
+INSERT INTO Transactions (transaction_id, account_id, transaction_amount, transaction_date)
+VALUES (2, 101, -100, SYSDATE);
+
+-- Test invalid withdrawal (should raise error)
+INSERT INTO Transactions (transaction_id, account_id, transaction_amount, transaction_date)
+VALUES (3, 101, -700, SYSDATE);
+
+-- Test invalid deposit (should raise error)
+INSERT INTO Transactions (transaction_id, account_id, transaction_amount, transaction_date)
+VALUES (4, 101, 0, SYSDATE);

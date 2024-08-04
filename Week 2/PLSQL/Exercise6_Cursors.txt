@@ -1,0 +1,115 @@
+-- Exercise 6: Cursors
+
+
+-- Scenario 1: Generate monthly statements for all customers.
+-- Question: Write a PL/SQL block using an explicit cursor GenerateMonthlyStatements that retrieves all transactions for the current month and prints a statement for each customer.
+
+-- Enable server output
+SET SERVEROUTPUT ON;
+
+DECLARE
+    CURSOR GenerateMonthlyStatements IS
+        SELECT t.TransactionID, t.AccountID, t.TransactionDate, t.Amount, t.TransactionType, a.CustomerID, c.Name
+        FROM Transactions t
+        JOIN Accounts a ON t.AccountID = a.AccountID
+        JOIN Customers c ON a.CustomerID = c.CustomerID
+        WHERE EXTRACT(MONTH FROM t.TransactionDate) = EXTRACT(MONTH FROM SYSDATE)
+          AND EXTRACT(YEAR FROM t.TransactionDate) = EXTRACT(YEAR FROM SYSDATE);
+        
+    v_TransactionID Transactions.TransactionID%TYPE;
+    v_AccountID Transactions.AccountID%TYPE;
+    v_TransactionDate Transactions.TransactionDate%TYPE;
+    v_Amount Transactions.Amount%TYPE;
+    v_TransactionType Transactions.TransactionType%TYPE;
+    v_CustomerID Accounts.CustomerID%TYPE;
+    v_CustomerName Customers.Name%TYPE;
+BEGIN
+    FOR rec IN GenerateMonthlyStatements LOOP
+        v_TransactionID := rec.TransactionID;
+        v_AccountID := rec.AccountID;
+        v_TransactionDate := rec.TransactionDate;
+        v_Amount := rec.Amount;
+        v_TransactionType := rec.TransactionType;
+        v_CustomerID := rec.CustomerID;
+        v_CustomerName := rec.Name;
+
+        DBMS_OUTPUT.PUT_LINE('Customer: ' || v_CustomerName || ' (ID: ' || v_CustomerID || ')');
+        DBMS_OUTPUT.PUT_LINE('Transaction ID: ' || v_TransactionID);
+        DBMS_OUTPUT.PUT_LINE('Account ID: ' || v_AccountID);
+        DBMS_OUTPUT.PUT_LINE('Transaction Date: ' || TO_CHAR(v_TransactionDate, 'YYYY-MM-DD'));
+        DBMS_OUTPUT.PUT_LINE('Amount: ' || v_Amount);
+        DBMS_OUTPUT.PUT_LINE('Transaction Type: ' || v_TransactionType);
+        DBMS_OUTPUT.PUT_LINE('-----------------------------------');
+    END LOOP;
+END;
+/
+
+
+
+
+
+-- Scenario 2: Apply annual fee to all accounts.
+-- Question: Write a PL/SQL block using an explicit cursor ApplyAnnualFee that deducts an annual maintenance fee from the balance of all accounts.
+
+-- Enable server output
+SET SERVEROUTPUT ON;
+
+DECLARE
+    CURSOR ApplyAnnualFee IS
+        SELECT AccountID, Balance
+        FROM Accounts;
+        
+    v_AccountID Accounts.AccountID%TYPE;
+    v_Balance Accounts.Balance%TYPE;
+    v_AnnualFee CONSTANT NUMBER := 50; -- Annual maintenance fee amount
+BEGIN
+    FOR rec IN ApplyAnnualFee LOOP
+        v_AccountID := rec.AccountID;
+        v_Balance := rec.Balance;
+        
+        UPDATE Accounts
+        SET Balance = v_Balance - v_AnnualFee
+        WHERE AccountID = v_AccountID;
+    END LOOP;
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Annual maintenance fee applied to all accounts.');
+END;
+/
+
+
+
+
+
+
+-- Scenario 3: Update the interest rate for all loans based on a new policy.
+-- Question: Write a PL/SQL block using an explicit cursor UpdateLoanInterestRates that fetches all loans and updates their interest rates based on the new policy.
+
+-- Enable server output
+SET SERVEROUTPUT ON;
+
+DECLARE
+    CURSOR UpdateLoanInterestRates IS
+        SELECT LoanID, InterestRate
+        FROM Loans;
+        
+    v_LoanID Loans.LoanID%TYPE;
+    v_InterestRate Loans.InterestRate%TYPE;
+    v_NewInterestRate Loans.InterestRate%TYPE;
+BEGIN
+    FOR rec IN UpdateLoanInterestRates LOOP
+        v_LoanID := rec.LoanID;
+        v_InterestRate := rec.InterestRate;
+        
+        -- Example policy: increase interest rate by 0.5%
+        v_NewInterestRate := v_InterestRate + 0.5;
+        
+        UPDATE Loans
+        SET InterestRate = v_NewInterestRate
+        WHERE LoanID = v_LoanID;
+    END LOOP;
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Interest rates updated for all loans.');
+END;
+/
+
+

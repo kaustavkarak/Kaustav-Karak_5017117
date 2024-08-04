@@ -1,0 +1,221 @@
+-- Exercise 7: Packages
+
+
+-- Scenario 1: Group all customer-related procedures and functions into a package.
+-- Question: Create a package CustomerManagement with procedures for adding a new customer, updating customer details, and a function to get customer balance.
+
+-- Package Specification
+CREATE OR REPLACE PACKAGE CustomerManagement AS
+    PROCEDURE AddCustomer(
+        p_CustomerID IN NUMBER, 
+        p_Name IN VARCHAR2, 
+        p_DOB IN DATE, 
+        p_Balance IN NUMBER, 
+        p_LastModified IN DATE
+    );
+
+    PROCEDURE UpdateCustomerDetails(
+        p_CustomerID IN NUMBER, 
+        p_Name IN VARCHAR2, 
+        p_DOB IN DATE, 
+        p_Balance IN NUMBER, 
+        p_LastModified IN DATE
+    );
+
+    FUNCTION GetCustomerBalance(
+        p_CustomerID IN NUMBER
+    ) RETURN NUMBER;
+END CustomerManagement;
+/
+
+-- Package Body
+CREATE OR REPLACE PACKAGE BODY CustomerManagement AS
+    PROCEDURE AddCustomer(
+        p_CustomerID IN NUMBER, 
+        p_Name IN VARCHAR2, 
+        p_DOB IN DATE, 
+        p_Balance IN NUMBER, 
+        p_LastModified IN DATE
+    ) IS
+    BEGIN
+        INSERT INTO Customers (CustomerID, Name, DOB, Balance, LastModified)
+        VALUES (p_CustomerID, p_Name, p_DOB, p_Balance, p_LastModified);
+        COMMIT;
+    END AddCustomer;
+
+    PROCEDURE UpdateCustomerDetails(
+        p_CustomerID IN NUMBER, 
+        p_Name IN VARCHAR2, 
+        p_DOB IN DATE, 
+        p_Balance IN NUMBER, 
+        p_LastModified IN DATE
+    ) IS
+    BEGIN
+        UPDATE Customers
+        SET Name = p_Name, DOB = p_DOB, Balance = p_Balance, LastModified = p_LastModified
+        WHERE CustomerID = p_CustomerID;
+        COMMIT;
+    END UpdateCustomerDetails;
+
+    FUNCTION GetCustomerBalance(
+        p_CustomerID IN NUMBER
+    ) RETURN NUMBER IS
+        v_Balance NUMBER;
+    BEGIN
+        SELECT Balance INTO v_Balance
+        FROM Customers
+        WHERE CustomerID = p_CustomerID;
+        
+        RETURN v_Balance;
+    END GetCustomerBalance;
+END CustomerManagement;
+/
+
+
+
+
+
+-- Scenario 2: Create a package to manage employee data.
+-- Question: Write a package EmployeeManagement with procedures to hire new employees, update employee details, and a function to calculate annual salary.
+
+-- Package Specification
+CREATE OR REPLACE PACKAGE EmployeeManagement AS
+    PROCEDURE HireEmployee(
+        p_EmployeeID IN NUMBER, 
+        p_Name IN VARCHAR2, 
+        p_Position IN VARCHAR2, 
+        p_Salary IN NUMBER, 
+        p_Department IN VARCHAR2, 
+        p_HireDate IN DATE
+    );
+
+    PROCEDURE UpdateEmployeeDetails(
+        p_EmployeeID IN NUMBER, 
+        p_Name IN VARCHAR2, 
+        p_Position IN VARCHAR2, 
+        p_Salary IN NUMBER, 
+        p_Department IN VARCHAR2, 
+        p_HireDate IN DATE
+    );
+
+    FUNCTION CalculateAnnualSalary(
+        p_EmployeeID IN NUMBER
+    ) RETURN NUMBER;
+END EmployeeManagement;
+/
+
+-- Package Body
+CREATE OR REPLACE PACKAGE BODY EmployeeManagement AS
+    PROCEDURE HireEmployee(
+        p_EmployeeID IN NUMBER, 
+        p_Name IN VARCHAR2, 
+        p_Position IN VARCHAR2, 
+        p_Salary IN NUMBER, 
+        p_Department IN VARCHAR2, 
+        p_HireDate IN DATE
+    ) IS
+    BEGIN
+        INSERT INTO Employees (EmployeeID, Name, Position, Salary, Department, HireDate)
+        VALUES (p_EmployeeID, p_Name, p_Position, p_Salary, p_Department, p_HireDate);
+        COMMIT;
+    END HireEmployee;
+
+    PROCEDURE UpdateEmployeeDetails(
+        p_EmployeeID IN NUMBER, 
+        p_Name IN VARCHAR2, 
+        p_Position IN VARCHAR2, 
+        p_Salary IN NUMBER, 
+        p_Department IN VARCHAR2, 
+        p_HireDate IN DATE
+    ) IS
+    BEGIN
+        UPDATE Employees
+        SET Name = p_Name, Position = p_Position, Salary = p_Salary, Department = p_Department, HireDate = p_HireDate
+        WHERE EmployeeID = p_EmployeeID;
+        COMMIT;
+    END UpdateEmployeeDetails;
+
+    FUNCTION CalculateAnnualSalary(
+        p_EmployeeID IN NUMBER
+    ) RETURN NUMBER IS
+        v_Salary NUMBER;
+        v_AnnualSalary NUMBER;
+    BEGIN
+        SELECT Salary INTO v_Salary
+        FROM Employees
+        WHERE EmployeeID = p_EmployeeID;
+        
+        v_AnnualSalary := v_Salary * 12;
+        RETURN v_AnnualSalary;
+    END CalculateAnnualSalary;
+END EmployeeManagement;
+/
+
+
+
+
+
+
+-- Scenario 3: Group all account-related operations into a package.
+-- Question: Create a package AccountOperations with procedures for opening a new account, closing an account, and a function to get the total balance of a customer across all accounts.
+
+-- Package Specification
+CREATE OR REPLACE PACKAGE AccountOperations AS
+    PROCEDURE OpenAccount(
+        p_AccountID IN NUMBER, 
+        p_CustomerID IN NUMBER, 
+        p_AccountType IN VARCHAR2, 
+        p_Balance IN NUMBER, 
+        p_LastModified IN DATE
+    );
+
+    PROCEDURE CloseAccount(
+        p_AccountID IN NUMBER
+    );
+
+    FUNCTION GetTotalBalance(
+        p_CustomerID IN NUMBER
+    ) RETURN NUMBER;
+END AccountOperations;
+/
+
+-- Package Body
+CREATE OR REPLACE PACKAGE BODY AccountOperations AS
+    PROCEDURE OpenAccount(
+        p_AccountID IN NUMBER, 
+        p_CustomerID IN NUMBER, 
+        p_AccountType IN VARCHAR2, 
+        p_Balance IN NUMBER, 
+        p_LastModified IN DATE
+    ) IS
+    BEGIN
+        INSERT INTO Accounts (AccountID, CustomerID, AccountType, Balance, LastModified)
+        VALUES (p_AccountID, p_CustomerID, p_AccountType, p_Balance, p_LastModified);
+        COMMIT;
+    END OpenAccount;
+
+    PROCEDURE CloseAccount(
+        p_AccountID IN NUMBER
+    ) IS
+    BEGIN
+        DELETE FROM Accounts
+        WHERE AccountID = p_AccountID;
+        COMMIT;
+    END CloseAccount;
+
+    FUNCTION GetTotalBalance(
+        p_CustomerID IN NUMBER
+    ) RETURN NUMBER IS
+        v_TotalBalance NUMBER;
+    BEGIN
+        SELECT SUM(Balance) INTO v_TotalBalance
+        FROM Accounts
+        WHERE CustomerID = p_CustomerID;
+        
+        RETURN v_TotalBalance;
+    END GetTotalBalance;
+END AccountOperations;
+/
+
+
+
