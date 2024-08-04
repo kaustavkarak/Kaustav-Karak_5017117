@@ -13,4 +13,4 @@ Superset ID: 5017117
 [Week 2](https://github.com/kaustavkarak/KaustavKarak_5017117/tree/main/Week%202)
 <br />
 <br />
-In this repository, I will be uploading all the weekly exercises of Cognizant Digital Nurture Program 3.0.
+This repository is dedicated to the weekly exercises of the Cognizant Digital Nurture Program 3.0.
