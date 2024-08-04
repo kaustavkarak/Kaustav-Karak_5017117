@@ -5,6 +5,7 @@ The '.txt' file contains PLSQL Queries
 <br />
 **Schema to be Created**
 <br />
+<br />
 CREATE TABLE Customers (
     CustomerID NUMBER PRIMARY KEY,
     Name VARCHAR2(100),
