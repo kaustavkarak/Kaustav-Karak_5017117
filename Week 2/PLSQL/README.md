@@ -1,5 +1,5 @@
 ## PLSQL
-The '.txt' files contain PL/SQL Queries
+The '.txt' files contain PL/SQL queries.
 <br />
 <br />
 <br />
