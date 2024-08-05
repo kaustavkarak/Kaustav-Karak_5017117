@@ -19,5 +19,6 @@ If we are using an IDE, we can run the _Application_ class directly.
 **or**
 <br />
 We can run the application using the following Maven command:
+<br />
 _mvn exec:java -Dexec.mainClass="com.library.{Name_of_Application_Class}"_
 
