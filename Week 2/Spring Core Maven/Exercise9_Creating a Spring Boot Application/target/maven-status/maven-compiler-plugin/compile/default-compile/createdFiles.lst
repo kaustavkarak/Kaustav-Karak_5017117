@@ -1,0 +1,4 @@
+com\example\LibraryManagement\LibraryManagementApplication.class
+com\example\LibraryManagement\repository\BookRepository.class
+com\example\LibraryManagement\entity\Book.class
+com\example\LibraryManagement\controller\BookController.class
