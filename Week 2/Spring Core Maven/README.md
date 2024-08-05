@@ -9,6 +9,8 @@ The 'README.md' file in each folder contains the corresponding project outputs.
 ### Steps to Build and Run the Project:
 Step 1: **Build the Project:**
 <br />
+Execute the following command in the terminal:
+<br />
 _mvn clean install_
 <br />
 <br />
